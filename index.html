@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#2F5D3A">
+<title>Giardino</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐾</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet">
+<style>
+/* ================= CONFIGURAZIONE =================
+   TOPIC: nome "segreto" condiviso tra te e tua sorella.
+   Chi lo conosce può leggere e cambiare lo stato: tienilo lungo e casuale.
+   NOTIFY_EMAIL (facoltativo): indirizzo a cui inviare anche una mail a ogni cambio.
+   Si modificano nello <script> in fondo. */
+:root{
+  --bg:#EEF2E6; --ink:#1E2A1F; --soft:#5B6B5C; --line:#CBD6BF;
+  --free:#2F5D3A; --kira:#C8811A; --lulu:#6D4FA8; --unk:#7A7A6E;
+  --card:#FFFFFF;
+  --font:"Bricolage Grotesque", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#131A14; --ink:#E8EFE2; --soft:#9FB09F; --line:#2C3A2D; --card:#1B241C;
+         --free:#4F9A62; --kira:#E3A043; --lulu:#9C82D6; --unk:#8C8C80; }
+}
+*{box-sizing:border-box}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);-webkit-font-smoothing:antialiased}
+main{max-width:520px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;padding:16px}
+
+.stage{--c:var(--unk);flex:1;min-height:52vh;border-radius:28px;background:var(--c);color:#fff;
+  padding:28px 24px;display:flex;flex-direction:column;justify-content:flex-end;position:relative;overflow:hidden;
+  transition:background-color .5s ease}
+.stage[data-s="libero"]{--c:var(--free)}
+.stage[data-s="kira"]{--c:var(--kira)}
+.stage[data-s="lulu"]{--c:var(--lulu)}
+.paw{position:absolute;top:-10px;right:-18px;font-size:170px;opacity:.16;line-height:1;transform:rotate(-18deg);pointer-events:none}
+.stage h1{font-size:clamp(2.4rem,11vw,3.6rem);font-weight:800;line-height:.98;letter-spacing:-.02em;margin:0 0 14px}
+.stage p{margin:0;font-size:1.05rem;opacity:.92;line-height:1.4}
+.live{position:absolute;top:22px;left:24px;font-size:.9rem;display:flex;align-items:center;gap:8px;opacity:.9}
+.dot{width:9px;height:9px;border-radius:50%;background:#fff;opacity:.5}
+.live.on .dot{opacity:1;box-shadow:0 0 0 4px rgba(255,255,255,.25)}
+
+.actions{display:grid;gap:10px;margin-top:14px}
+button{font:inherit;cursor:pointer;border:0}
+.act{padding:20px;border-radius:18px;font-size:1.2rem;font-weight:600;text-align:left;display:flex;justify-content:space-between;align-items:center;
+  background:var(--card);color:var(--ink);border:2px solid var(--line)}
+.act .who{width:14px;height:14px;border-radius:50%}
+.act.primary{color:#fff;border-color:transparent;font-size:1.35rem;padding:24px 20px}
+.act:disabled{opacity:.5;cursor:progress}
+.act:focus-visible,.link:focus-visible,input:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+
+footer{margin-top:18px;color:var(--soft);font-size:.95rem}
+details summary{cursor:pointer;padding:6px 0}
+.set{display:grid;gap:10px;padding:10px 0 4px}
+label{display:grid;gap:4px;font-size:.9rem}
+input{font:inherit;padding:12px;border-radius:12px;border:2px solid var(--line);background:var(--card);color:var(--ink)}
+.link{background:none;color:var(--soft);text-decoration:underline;padding:0;font-size:.95rem;justify-self:start}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,120px);
+  background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:14px;transition:transform .3s ease;max-width:90%}
+.toast.show{transform:translate(-50%,0)}
+@media (prefers-reduced-motion: reduce){ *{transition:none!important} }
+</style>
+</head>
+<body>
+<main>
+  <section class="stage" id="stage" data-s="unk" aria-live="polite">
+    <div class="live" id="live"><span class="dot"></span><span id="liveTxt">Connessione…</span></div>
+    <div class="paw" aria-hidden="true">🐾</div>
+    <h1 id="title">Controllo il giardino…</h1>
+    <p id="sub">Un attimo.</p>
+  </section>
+
+  <div class="actions" id="actions"></div>
+
+  <footer>
+    <details>
+      <summary>Impostazioni</summary>
+      <div class="set">
+        <label>Il tuo nome (compare nelle notifiche)
+          <input id="name" autocomplete="given-name" placeholder="Es. Fabio">
+        </label>
+        <button class="link" id="refresh" type="button">Aggiorna lo stato adesso</button>
+      </div>
+    </details>
+  </footer>
+</main>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+/* ================= CONFIGURAZIONE ================= */
+const TOPIC = "giardino-kira-lulu-q7m4x2vh9t"; // cambialo con una stringa tua, lunga e casuale
+const NOTIFY_EMAIL = "";                        // es. "tuamail@gmail.com" (facoltativo)
+const SERVER = "https://ntfy.sh";
+/* ================================================== */
+
+const DOGS = { kira: "Kira", lulu: "Lulù" };
+const MAX_AGE = 12 * 3600; // ntfy.sh conserva i messaggi per 12 ore
+let state = { s: "unk", by: "", t: 0 };
+let busy = false;
+
+const $ = id => document.getElementById(id);
+const nameInput = $("name");
+try { nameInput.value = localStorage.getItem("giardino-nome") || ""; } catch(e) {}
+nameInput.addEventListener("change", () => { try { localStorage.setItem("giardino-nome", nameInput.value.trim()); } catch(e) {} });
+
+function myName(){
+  let n = nameInput.value.trim();
+  if (!n) {
+    n = (prompt("Come ti chiami? (compare nelle notifiche)") || "").trim();
+    if (n) { nameInput.value = n; try { localStorage.setItem("giardino-nome", n); } catch(e) {} }
+  }
+  return n || "Qualcuno";
+}
+
+function ago(t){
+  const m = Math.round((Date.now()/1000 - t) / 60);
+  if (m < 1) return "adesso";
+  if (m < 60) return `da ${m} min`;
+  const h = Math.floor(m/60), r = m % 60;
+  return `da ${h} h${r ? " " + r + " min" : ""}`;
+}
+
+function parse(msg){
+  if (!msg || msg.event !== "message") return null;
+  const tags = msg.tags || [];
+  const st = tags.find(x => x.startsWith("s_"));
+  if (!st) return null;
+  const by = decodeURIComponent((tags.find(x => x.startsWith("by_")) || "by_").slice(3));
+  return { s: st.slice(2), by, t: msg.time };
+}
+
+function render(){
+  const stale = state.t && (Date.now()/1000 - state.t) > MAX_AGE;
+  const s = (!state.t || stale) ? "unk" : state.s;
+  $("stage").dataset.s = s;
+
+  if (s === "libero") {
+    $("title").textContent = "Il giardino è libero";
+    $("sub").textContent = state.by ? `Ultimo rientro ${ago(state.t)}, segnalato da ${state.by}.` : "Puoi far uscire un cane.";
+  } else if (s === "kira" || s === "lulu") {
+    const d = DOGS[s];
+    $("title").textContent = `${d} è in giardino`;
+    $("sub").textContent = `Fuori ${ago(state.t)}${state.by ? ", l'ha fatta uscire " + state.by : ""}. Non far uscire l'altra.`;
+  } else {
+    $("title").textContent = "Stato sconosciuto";
+    $("sub").textContent = stale
+      ? "Nessun aggiornamento nelle ultime 12 ore. Controlla il giardino e imposta lo stato."
+      : "Nessuna segnalazione recente. Controlla il giardino e imposta lo stato.";
+  }
+
+  const box = $("actions"); box.innerHTML = "";
+  const add = (label, color, next, primary) => {
+    const b = document.createElement("button");
+    b.className = "act" + (primary ? " primary" : "");
+    b.type = "button";
+    if (primary) b.style.background = `var(--${color})`;
+    b.innerHTML = `<span></span>` + (primary ? "" : `<span class="who" style="background:var(--${color})"></span>`);
+    b.firstChild.textContent = label;
+    b.disabled = busy;
+    b.onclick = () => change(next);
+    box.appendChild(b);
+  };
+
+  if (s === "kira" || s === "lulu") {
+    add(`${DOGS[s]} è rientrata`, "free", "libero", true);
+    const other = s === "kira" ? "lulu" : "kira";
+    add(`Scambio: rientra ${DOGS[s]}, esce ${DOGS[other]}`, other, other, false);
+  } else {
+    add("Esce Kira", "kira", "kira", true);
+    add("Esce Lulù", "lulu", "lulu", true);
+    if (s === "unk") add("Il giardino è libero", "free", "libero", false);
+  }
+}
+
+async function change(next){
+  const cur = $("stage").dataset.s;
+  if ((next === "kira" || next === "lulu") && (cur === "kira" || cur === "lulu") && cur !== next) {
+    // passaggio diretto: consentito solo tramite il pulsante "Scambio", che lo chiede esplicitamente
+    if (!confirm(`${DOGS[cur]} è già rientrata in casa?`)) return;
+  }
+  const by = myName();
+  let title, message, priority;
+  if (next === "libero") {
+    const d = DOGS[cur];
+    title = d ? `🏠 ${d} è rientrata` : "🏠 Giardino libero";
+    message = `Il giardino è libero (${by}).`;
+    priority = 3;
+  } else {
+    title = `🐕 ${DOGS[next]} è in giardino`;
+    message = `L'ha fatta uscire ${by}. Tieni dentro ${next === "kira" ? "Lulù" : "Kira"}!`;
+    priority = 4;
+  }
+  const body = { topic: TOPIC, title, message, priority, tags: ["s_" + next, "by_" + encodeURIComponent(by)] };
+  if (NOTIFY_EMAIL) body.email = NOTIFY_EMAIL;
+
+  busy = true; render();
+  try {
+    const r = await fetch(SERVER, { method: "POST", body: JSON.stringify(body) });
+    if (!r.ok) throw new Error(r.status);
+    const msg = await r.json();
+    const p = parse(msg); if (p) state = p;
+    toast("Stato aggiornato e notifica inviata");
+  } catch(e) {
+    toast("Invio non riuscito. Controlla la connessione e riprova.");
+  } finally { busy = false; render(); }
+}
+
+async function poll(){
+  try {
+    const r = await fetch(`${SERVER}/${TOPIC}/json?poll=1&since=latest`, { cache: "no-store" });
+    const lines = (await r.text()).trim().split("\n").filter(Boolean);
+    for (const l of lines) { const p = parse(JSON.parse(l)); if (p && p.t >= state.t) state = p; }
+    if (!lines.length) state = { s: "unk", by: "", t: 0 };
+  } catch(e) { toast("Non riesco a leggere lo stato. Sei online?"); }
+  render();
+}
+
+function listen(){
+  const es = new EventSource(`${SERVER}/${TOPIC}/sse`);
+  es.onopen = () => { $("live").classList.add("on"); $("liveTxt").textContent = "In tempo reale"; };
+  es.onerror = () => { $("live").classList.remove("on"); $("liveTxt").textContent = "Riconnessione…"; };
+  es.onmessage = e => { const p = parse(JSON.parse(e.data)); if (p && p.t >= state.t) { state = p; render(); } };
+}
+
+let tt;
+function toast(t){ const el = $("toast"); el.textContent = t; el.classList.add("show"); clearTimeout(tt); tt = setTimeout(() => el.classList.remove("show"), 2600); }
+
+$("refresh").onclick = poll;
+document.addEventListener("visibilitychange", () => { if (!document.hidden) poll(); });
+setInterval(render, 30000); // aggiorna "da X min"
+poll(); listen();
+</script>
+</body>
+</html>
