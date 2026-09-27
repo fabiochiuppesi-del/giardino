@@ -86,6 +86,15 @@ input{font:inherit;padding:12px;border-radius:12px;border:2px solid var(--line);
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,140px);
   background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:14px;transition:transform .3s ease;max-width:90%}
 .toast.show{transform:translate(-50%,0)}
+
+.scene{position:absolute;inset:0;width:100%;height:100%;display:none}
+.stage[data-s="libero"] .scene{display:block}
+.stage[data-s="libero"] .paw{display:none}
+.stage[data-s="libero"]::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(20,58,28,.92) 0%,rgba(20,58,28,.75) 32%,rgba(20,58,28,0) 58%);pointer-events:none}
+.stage > h1,.stage > p,.stage > .stale-tag{position:relative;z-index:1}
+.stage[data-s="libero"] h1{text-shadow:0 2px 12px rgba(0,0,0,.35)}
+.fly{animation:fly 6s ease-in-out infinite}
+@keyframes fly{0%,100%{transform:translate(120px,150px) rotate(-6deg)}50%{transform:translate(170px,128px) rotate(8deg)}}
 @media (prefers-reduced-motion: reduce){ *{transition:none!important;animation:none!important} }
 </style>
 </head>
@@ -96,6 +105,31 @@ input{font:inherit;padding:12px;border-radius:12px;border:2px solid var(--line);
   </div>
 
   <section class="stage" id="stage" data-s="unk" aria-live="polite">
+    <svg class="scene" viewBox="0 0 400 500" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+<defs>
+<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8FCBEB"/><stop offset="1" stop-color="#DDF1DA"/></linearGradient>
+<radialGradient id="sun"><stop offset="0" stop-color="#FFF3B0"/><stop offset=".55" stop-color="#FFD24D"/><stop offset="1" stop-color="#FFD24D" stop-opacity="0"/></radialGradient>
+<linearGradient id="path" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#EADBA8"/><stop offset="1" stop-color="#D9C37E"/></linearGradient>
+</defs>
+<rect width="400" height="500" fill="url(#sky)"/>
+<circle cx="318" cy="72" r="70" fill="url(#sun)"/>
+<circle cx="318" cy="72" r="28" fill="#FFD84F"/>
+<g fill="#fff" opacity=".9"><ellipse cx="80" cy="70" rx="42" ry="15"/><ellipse cx="108" cy="60" rx="26" ry="16"/><ellipse cx="220" cy="110" rx="30" ry="10"/><ellipse cx="238" cy="103" rx="18" ry="11"/></g>
+<path d="M0 205 C90 170 170 185 240 200 S360 175 400 190 V500 H0Z" fill="#9BCF74"/>
+<g><rect x="345" y="120" width="10" height="80" fill="#7A5A3A"/><circle cx="350" cy="112" r="34" fill="#4E9A3E"/><circle cx="330" cy="128" r="22" fill="#5DAA48"/><circle cx="372" cy="126" r="22" fill="#5DAA48"/></g>
+<path d="M0 232 C110 222 290 222 400 232 V500 H0Z" fill="#6DB553"/>
+<g fill="#F6EEDC" stroke="#C8B287" stroke-width="1.5"><path d="M-6 186 L0.5 178 L7 186 V240 H-6 Z"/><path d="M14 186 L20.5 178 L27 186 V240 H14 Z"/><path d="M34 186 L40.5 178 L47 186 V240 H34 Z"/><path d="M54 186 L60.5 178 L67 186 V240 H54 Z"/><path d="M74 186 L80.5 178 L87 186 V240 H74 Z"/><path d="M94 186 L100.5 178 L107 186 V240 H94 Z"/><path d="M114 186 L120.5 178 L127 186 V240 H114 Z"/><path d="M134 186 L140.5 178 L147 186 V240 H134 Z"/><path d="M154 186 L160.5 178 L167 186 V240 H154 Z"/><path d="M244 186 L250.5 178 L257 186 V240 H244 Z"/><path d="M264 186 L270.5 178 L277 186 V240 H264 Z"/><path d="M284 186 L290.5 178 L297 186 V240 H284 Z"/><path d="M304 186 L310.5 178 L317 186 V240 H304 Z"/><path d="M324 186 L330.5 178 L337 186 V240 H324 Z"/><path d="M344 186 L350.5 178 L357 186 V240 H344 Z"/><path d="M364 186 L370.5 178 L377 186 V240 H364 Z"/><path d="M384 186 L390.5 178 L397 186 V240 H384 Z"/><path d="M404 186 L410.5 178 L417 186 V240 H404 Z"/>
+<rect x="-10" y="192" width="170" height="7" /><rect x="-10" y="220" width="170" height="7"/>
+<rect x="240" y="192" width="170" height="7"/><rect x="240" y="220" width="170" height="7"/>
+<rect x="156" y="168" width="12" height="76" rx="2"/><rect x="232" y="168" width="12" height="76" rx="2"/>
+<path d="M244 176 L300 192 L300 262 L244 244 Z"/>
+<path d="M248 184 L296 198 M248 234 L296 250 M258 181 V240 M270 184 V246 M282 188 V250" fill="none" stroke-width="3"/>
+</g>
+<path d="M168 244 H232 L300 500 H100 Z" fill="url(#path)"/>
+<path d="M168 244 C140 300 120 400 100 500 M232 244 C260 300 280 400 300 500" fill="none" stroke="#5DA746" stroke-width="3" opacity=".5"/>
+<g><circle cx="40" cy="262" r="4" fill="#fff"/><circle cx="70" cy="290" r="4" fill="#FFD84F"/><circle cx="330" cy="275" r="4" fill="#fff"/><circle cx="360" cy="300" r="4" fill="#F28DB2"/><circle cx="20" cy="310" r="4" fill="#F28DB2"/><circle cx="385" cy="258" r="3.5" fill="#FFD84F"/><circle cx="110" cy="268" r="3.5" fill="#fff"/><circle cx="300" cy="250" r="3" fill="#F28DB2"/></g>
+<g class="fly" transform="translate(120 150)"><path d="M0 0 C-10 -12 -18 -2 -8 4 C-16 10 -6 16 0 4 C6 16 16 10 8 4 C18 -2 10 -12 0 0Z" fill="#F29A4A"/><path d="M0 -2 V8" stroke="#6A3F1E" stroke-width="1.5"/></g>
+</svg>
     <div class="paw" aria-hidden="true">🐾</div>
     <div class="stale-tag">Ultimo stato noto</div>
     <div class="alert"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2 1 21h22L12 2Zm0 5.5 7.5 12.5h-15L12 7.5ZM11 10v5h2v-5h-2Zm0 6v2h2v-2h-2Z"/></svg>Attenzione, giardino occupato</div>
